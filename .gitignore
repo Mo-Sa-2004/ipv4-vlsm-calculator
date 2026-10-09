@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Jupyter Notebook & IPython
+.ipynb_checkpoints
+.ipynb_checkpoints/
+
+# Environments & Local Configs
+.env
+.venv
+env/
+venv/
+
+# IDEs and Editors
+.vscode/
+.idea/
+
+# Presentations
+*.pptx
