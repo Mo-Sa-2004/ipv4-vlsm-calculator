@@ -2,7 +2,20 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.2.0]
+
+### Added
+
+- Non-interactive CLI mode: `--network`, `--sizes`, and `--json`, for
+  scripting and automation use instead of the interactive prompts.
+- `--version` flag.
+- Package metadata (`pyproject.toml`) — the project is now pip-installable
+  and exposes a `vlsm-calc` console command.
+- Ruff linting, CI (GitHub Actions) running the test suite on every push,
+  a doctest usage example, and more edge-case tests (`/32`, exact-fit
+  allocation, large `/8` networks).
+
+## [0.1.0]
 
 ### Fixed
 

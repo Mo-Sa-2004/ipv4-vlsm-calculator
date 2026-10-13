@@ -19,6 +19,8 @@ import json
 import sys
 from dataclasses import dataclass
 
+__version__ = "0.2.0"
+
 try:
     import pandas as pd
     import tabulate
@@ -240,6 +242,9 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--json",
         action="store_true",
         help="Print the result as JSON instead of a table.",
+    )
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
     )
     return parser.parse_args(argv)
 

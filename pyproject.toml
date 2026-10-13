@@ -7,7 +7,7 @@ py-modules = ["subnet_calculator"]
 
 [project]
 name = "ipv4-vlsm-calculator"
-version = "0.1.0"
+version = "0.2.0"
 description = "A VLSM (Variable Length Subnet Mask) calculator for IPv4 networks."
 readme = "README.md"
 license = { file = "LICENSE" }
