@@ -2,7 +2,7 @@ import ipaddress
 
 import pytest
 
-from subnet_calculator import allocate_vlsm, next_power_of_two
+from subnet_calculator import Subnet, allocate_vlsm, next_power_of_two
 
 
 def test_next_power_of_two_rounds_up():
@@ -77,3 +77,52 @@ def test_slash_31_point_to_point_uses_both_addresses():
     assert sub.usable_hosts == 2
     assert sub.first_usable == sub.network.network_address
     assert sub.last_usable == sub.network.broadcast_address
+
+
+def test_slash_32_single_host_route():
+    """allocate_vlsm never produces a /32 on its own (every request rounds
+    up to at least 2 addresses), but Subnet's own properties should still
+    be correct for one, since nothing stops a /32 from being constructed
+    directly -- e.g. by code reusing Subnet outside allocate_vlsm."""
+    sub = Subnet(
+        network=ipaddress.IPv4Network("10.0.0.5/32"),
+        requested_hosts=1,
+    )
+    assert sub.usable_hosts == 1
+    assert sub.first_usable == sub.last_usable == ipaddress.IPv4Address("10.0.0.5")
+
+
+def test_exact_fit_consumes_the_whole_base_network():
+    """Requests that add up to exactly the base network's capacity should
+    allocate cleanly, not raise, and use every address."""
+    base = ipaddress.IPv4Network("10.0.0.0/29")  # 8 addresses total
+    allocations = allocate_vlsm(base, [4, 2, 2])  # rounds to 4 + 2 + 2 = 8
+
+    last = allocations[-1]
+    assert sorted(a.network.network_address for a in allocations)[0] == base.network_address
+    # the final allocated block's broadcast address should be the base
+    # network's own broadcast address -- no address left unused, none spilled over
+    highest_broadcast = max(int(a.network.broadcast_address) for a in allocations)
+    assert highest_broadcast == int(base.broadcast_address)
+    assert last.network.subnet_of(base)
+
+
+def test_large_base_network_allocates_without_overlap():
+    """Sanity check at a much bigger scale than the other tests (a /8
+    instead of a /24-ish network) with a mix of very different sizes."""
+    base = ipaddress.IPv4Network("10.0.0.0/8")
+    requested = [2, 100000, 4, 500000, 1000, 2000000]
+
+    allocations = allocate_vlsm(base, requested)
+
+    assert [a.requested_hosts for a in allocations] == requested
+
+    ranges = sorted(
+        (int(a.network.network_address), int(a.network.broadcast_address))
+        for a in allocations
+    )
+    for (_start_a, end_a), (start_b, _end_b) in zip(ranges, ranges[1:], strict=False):
+        assert end_a < start_b, f"overlap at large scale: {ranges}"
+
+    for a in allocations:
+        assert a.network.subnet_of(base)
