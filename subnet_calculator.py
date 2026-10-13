@@ -13,7 +13,10 @@ Or import `allocate_vlsm` to use the logic from your own code.
 
 from __future__ import annotations
 
+import argparse
 import ipaddress
+import json
+import sys
 from dataclasses import dataclass
 
 try:
@@ -158,27 +161,38 @@ def _prompt_sizes(max_size: int) -> list[int]:
     return sizes
 
 
-def main() -> None:
-    network = _prompt_network()
-    sizes = _prompt_sizes(network.num_addresses)
+def _render_json(allocations: list[Subnet]) -> str:
+    return json.dumps(
+        [
+            {
+                "network": str(sub.network),
+                "start": str(sub.first_usable),
+                "end": str(sub.last_usable),
+                "hosts": sub.usable_hosts,
+                "broadcast": str(sub.network.broadcast_address),
+                "subnet_mask": str(sub.network.netmask),
+                "prefix": sub.network.prefixlen,
+                "requested_hosts": sub.requested_hosts,
+            }
+            for sub in allocations
+        ],
+        indent=2,
+    )
 
-    if not sizes:
-        print("No subnets requested — nothing to allocate.")
-        return
 
-    allocations = allocate_vlsm(network, sizes)
-
+def _render_table(allocations: list[Subnet]) -> str:
     if pd is None or tabulate is None:
-        print(
-            "\n'pandas' and 'tabulate' aren't installed, so here's the plain "
-            "result (run `pip install -r requirements.txt` for a table):\n"
-        )
-        for i, sub in enumerate(allocations, start=1):
-            print(
-                f"{i}. {sub.network}  hosts={sub.usable_hosts}  "
-                f"range={sub.first_usable}-{sub.last_usable}"
-            )
-        return
+        lines = [
+            "'pandas' and 'tabulate' aren't installed, so here's the plain "
+            "result (run `pip install -r requirements.txt` for a table):",
+            "",
+        ]
+        lines += [
+            f"{i}. {sub.network}  hosts={sub.usable_hosts}  "
+            f"range={sub.first_usable}-{sub.last_usable}"
+            for i, sub in enumerate(allocations, start=1)
+        ]
+        return "\n".join(lines)
 
     df = pd.DataFrame(
         [
@@ -195,8 +209,69 @@ def main() -> None:
         ],
         columns=["Network", "Start", "End", "Hosts", "Broadcast", "Subnet Mask", "Prefix"],
     )
+    return tabulate.tabulate(df, headers="keys", tablefmt="grid", showindex=False)
 
-    print("\n" + tabulate.tabulate(df, headers="keys", tablefmt="grid", showindex=False))
+
+def _parse_args(argv: list[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "VLSM calculator. Run with no arguments for the interactive "
+            "prompts, or pass --network and --sizes to run non-interactively "
+            "(handy for scripts)."
+        )
+    )
+    parser.add_argument(
+        "--network",
+        help="Base network, e.g. 192.168.1.0/24 (enables non-interactive mode).",
+    )
+    parser.add_argument(
+        "--sizes",
+        help="Comma-separated minimum host counts, e.g. 50,20,10,2 "
+        "(required when --network is given).",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the result as JSON instead of a table.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = _parse_args(argv)
+
+    if args.network:
+        try:
+            network = ipaddress.IPv4Network(args.network, strict=False)
+        except ValueError as exc:
+            print(f"Invalid --network: {exc}", file=sys.stderr)
+            raise SystemExit(2) from exc
+
+        if not args.sizes:
+            print("--sizes is required when --network is given.", file=sys.stderr)
+            raise SystemExit(2)
+
+        try:
+            sizes = [int(s.strip()) for s in args.sizes.split(",") if s.strip()]
+        except ValueError as exc:
+            print(f"Invalid --sizes: {exc}", file=sys.stderr)
+            raise SystemExit(2) from exc
+    else:
+        network = _prompt_network()
+        sizes = _prompt_sizes(network.num_addresses)
+
+    if not sizes:
+        print("No subnets requested — nothing to allocate.")
+        return
+
+    try:
+        allocations = allocate_vlsm(network, sizes)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
+
+    output = _render_json(allocations) if args.json else _render_table(allocations)
+    print(("\n" + output) if not args.json else output)
 
 
 if __name__ == "__main__":
