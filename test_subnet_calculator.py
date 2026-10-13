@@ -36,7 +36,9 @@ def test_allocations_never_overlap_regardless_of_request_order():
             for sub in allocations
         ]
         ranges.sort()
-        for (start_a, end_a), (start_b, end_b) in zip(ranges, ranges[1:]):
+        for (_start_a, end_a), (start_b, _end_b) in zip(
+            ranges, ranges[1:], strict=False
+        ):
             assert end_a < start_b, f"overlap: {ranges}"
 
     # Same requests, same base network -> same set of blocks, no matter what
