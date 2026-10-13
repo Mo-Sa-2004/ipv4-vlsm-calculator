@@ -85,6 +85,13 @@ def allocate_vlsm(
     overlapping subnets instead of a clean partition.
 
     Raises ValueError if a requested size can't fit in what's left of `base`.
+
+    >>> import ipaddress
+    >>> base = ipaddress.IPv4Network("192.168.1.0/24")
+    >>> for sub in allocate_vlsm(base, [2, 8]):
+    ...     print(sub.network, sub.usable_hosts)
+    192.168.1.8/31 2
+    192.168.1.0/29 6
     """
     order = sorted(range(len(requested_sizes)), key=lambda i: -requested_sizes[i])
 
