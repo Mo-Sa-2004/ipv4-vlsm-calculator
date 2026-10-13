@@ -22,6 +22,8 @@ with no gaps or overlaps.
   [RFC 3021](https://www.rfc-editor.org/rfc/rfc3021)).
 - Covered by unit tests, importable as a module if you want the allocation
   logic in your own code.
+- Non-interactive mode (`--network` / `--sizes` / `--json`) for scripting,
+  alongside the interactive prompts.
 
 ## Why "largest first" matters
 
@@ -41,7 +43,14 @@ cd ipv4-vlsm-calculator
 pip install -r requirements.txt
 ```
 
-Requires Python 3.9+.
+Requires Python 3.10+.
+
+Alternatively, install it as a package (adds a `vlsm-calc` command):
+
+```bash
+pip install -e .
+vlsm-calc --network 192.168.1.0/24 --sizes 50,20,10,2
+```
 
 ## Usage
 
@@ -76,6 +85,40 @@ Enter the minimum size of subnet 5 (max remaining = 142, or press Enter to stop)
 +---------------+---------------+---------------+---------+---------------+-----------------+----------+
 ```
 
+### Non-interactive / scripted use
+
+Pass `--network` and `--sizes` to skip the prompts entirely — useful in
+scripts or CI:
+
+```bash
+python subnet_calculator.py --network 192.168.1.0/24 --sizes 50,20,10,2
+```
+
+Add `--json` for machine-readable output:
+
+```bash
+python subnet_calculator.py --network 192.168.1.0/24 --sizes 50,20,10,2 --json
+```
+
+```json
+[
+  {
+    "network": "192.168.1.0/26",
+    "start": "192.168.1.1",
+    "end": "192.168.1.62",
+    "hosts": 62,
+    "broadcast": "192.168.1.63",
+    "subnet_mask": "255.255.255.192",
+    "prefix": 26,
+    "requested_hosts": 50
+  }
+]
+```
+
+An invalid network, missing `--sizes`, or a request that doesn't fit exits
+with a non-zero status and an error on stderr, so it's safe to use in a
+pipeline.
+
 ## Using it as a library
 
 ```python
@@ -93,9 +136,13 @@ for sub in subnets:
 
 ```bash
 pip install -r requirements-dev.txt
-pytest
+pytest       # unit tests, CLI end-to-end tests, and the doctest example
+ruff check . # lint
 ```
+
+Both run automatically in GitHub Actions on every push and pull request.
+See [CONTRIBUTING.md](CONTRIBUTING.md) if you'd like to submit one.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) — see [CHANGELOG.md](CHANGELOG.md) for version history.
