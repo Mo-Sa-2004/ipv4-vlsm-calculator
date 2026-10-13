@@ -1,5 +1,9 @@
 # IPv4 VLSM Calculator
 
+[![Tests](https://github.com/Mo-Sa-2004/ipv4-vlsm-calculator/actions/workflows/tests.yml/badge.svg)](https://github.com/Mo-Sa-2004/ipv4-vlsm-calculator/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+
 A command-line tool that takes an IPv4 network and a list of subnet host
 requirements, and allocates each one using **VLSM** (Variable Length Subnet
 Masking) — giving every subnet the smallest block that fits its requirement,
