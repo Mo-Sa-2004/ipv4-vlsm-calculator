@@ -41,3 +41,6 @@ jobs:
 
       - name: Run ruff
         run: ruff check .
+
+      - name: Run mypy
+        run: mypy subnet_calculator.py

@@ -18,8 +18,12 @@ import ipaddress
 import json
 import sys
 from dataclasses import dataclass
+from typing import Any
 
 __version__ = "0.2.0"
+
+pd: Any
+tabulate: Any
 
 try:
     import pandas as pd
@@ -218,7 +222,9 @@ def _render_table(allocations: list[Subnet]) -> str:
         ],
         columns=["Network", "Start", "End", "Hosts", "Broadcast", "Subnet Mask", "Prefix"],
     )
-    return tabulate.tabulate(df, headers="keys", tablefmt="grid", showindex=False)
+    return tabulate.tabulate(
+        df.values.tolist(), headers=list(df.columns), tablefmt="grid"
+    )
 
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
