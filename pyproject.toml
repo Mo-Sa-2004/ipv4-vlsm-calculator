@@ -27,4 +27,9 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
-testpaths = ["subnet_calculator.py", "test_subnet_calculator.py", "test_cli.py"]
+testpaths = [
+    "subnet_calculator.py",
+    "test_subnet_calculator.py",
+    "test_cli.py",
+    "test_rendering.py",
+]
