@@ -24,7 +24,9 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Run tests
-        run: pytest -v
+        run: >-
+          pytest -v --cov=subnet_calculator --cov-report=term-missing
+          --cov-fail-under=43
 
   lint:
     runs-on: ubuntu-latest
