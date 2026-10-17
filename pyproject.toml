@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -10,10 +10,30 @@ name = "ipv4-vlsm-calculator"
 version = "0.2.0"
 description = "A VLSM (Variable Length Subnet Mask) calculator for IPv4 networks."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [{ name = "Mohammed Saeed" }]
+keywords = ["vlsm", "subnetting", "ipv4", "subnet-calculator", "networking", "cidr"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+    "Topic :: Utilities",
+]
 dependencies = ["pandas>=2.0", "tabulate>=0.9"]
+
+[project.urls]
+Homepage = "https://github.com/Mo-Sa-2004/ipv4-vlsm-calculator"
+Repository = "https://github.com/Mo-Sa-2004/ipv4-vlsm-calculator"
+Issues = "https://github.com/Mo-Sa-2004/ipv4-vlsm-calculator/issues"
+Changelog = "https://github.com/Mo-Sa-2004/ipv4-vlsm-calculator/blob/main/CHANGELOG.md"
 
 [project.scripts]
 vlsm-calc = "subnet_calculator:main"
