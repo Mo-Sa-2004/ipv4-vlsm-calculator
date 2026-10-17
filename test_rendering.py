@@ -8,7 +8,8 @@ which coverage.py can't see since they run in a separate process.
 import ipaddress
 import json
 
-from subnet_calculator import Subnet, _render_json, allocate_vlsm
+import subnet_calculator
+from subnet_calculator import Subnet, _render_json, _render_table, allocate_vlsm
 
 BASE = ipaddress.IPv4Network("192.168.1.0/24")
 
@@ -38,3 +39,45 @@ def test_render_json_fields_match_the_allocated_subnet():
 
 def test_render_json_of_empty_list_is_empty_array():
     assert json.loads(_render_json([])) == []
+
+
+def test_render_table_with_pandas_and_tabulate_produces_a_grid():
+    allocations = allocate_vlsm(BASE, [50, 20])
+    output = _render_table(allocations)
+
+    # The grid table's header row and borders, plus every allocated network.
+    assert "Network" in output
+    assert "Hosts" in output
+    assert "+---" in output
+    for sub in allocations:
+        assert str(sub.network.network_address) in output
+
+
+def test_render_table_without_pandas_or_tabulate_falls_back_to_plain_text(monkeypatch):
+    """_render_table checks `pd is None or tabulate is None` to decide
+    whether to fall back -- simulate the deps being missing by patching
+    those module-level names directly, the same way the real ImportError
+    branch would leave them."""
+    monkeypatch.setattr(subnet_calculator, "pd", None)
+    monkeypatch.setattr(subnet_calculator, "tabulate", None)
+
+    allocations = allocate_vlsm(BASE, [50, 20])
+    output = _render_table(allocations)
+
+    assert "pandas" in output
+    assert "tabulate" in output
+    assert "pip install -r requirements.txt" in output
+    for i, sub in enumerate(allocations, start=1):
+        assert f"{i}. {sub.network}" in output
+        assert f"hosts={sub.usable_hosts}" in output
+        assert f"range={sub.first_usable}-{sub.last_usable}" in output
+
+
+def test_render_table_fallback_with_empty_list_has_no_entry_lines(monkeypatch):
+    monkeypatch.setattr(subnet_calculator, "pd", None)
+    monkeypatch.setattr(subnet_calculator, "tabulate", None)
+
+    output = _render_table([])
+
+    assert "pandas" in output
+    assert output.strip().endswith("run `pip install -r requirements.txt` for a table):")
