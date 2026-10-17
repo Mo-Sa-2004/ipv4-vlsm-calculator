@@ -105,8 +105,11 @@ def allocate_vlsm(
     cursor = int(base.network_address)
     limit = int(base.broadcast_address) + 1
 
-    for i in order:
-        size = next_power_of_two(requested_sizes[i])
+        for i in order:
+        try:
+            size = next_power_of_two(requested_sizes[i])
+        except ValueError as exc:
+            raise ValueError(f"Request #{i + 1}: {exc}") from exc
         if cursor + size > limit:
             raise ValueError(
                 f"Request #{i + 1} needs {requested_sizes[i]} addresses "

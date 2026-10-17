@@ -69,6 +69,14 @@ def test_allocation_raises_when_it_does_not_fit():
         allocate_vlsm(base, [2, 4])  # needs 6, base only has 4
 
 
+def test_non_positive_request_error_names_which_request_number():
+    """Regression test: this error used to just say 'subnet size must be a
+    positive number' with no way to tell which of several requests caused
+    it, unlike the 'doesn't fit' error above, which does."""
+    base = ipaddress.IPv4Network("192.168.1.0/24")
+    with pytest.raises(ValueError, match=r"Request #2: .*positive number"):
+        allocate_vlsm(base, [10, 0, 5])
+
 def test_slash_31_point_to_point_uses_both_addresses():
     base = ipaddress.IPv4Network("10.0.0.0/24")
     allocations = allocate_vlsm(base, [2])
