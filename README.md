@@ -131,7 +131,14 @@ subnets = allocate_vlsm(base, [50, 20, 10, 2])
 for sub in subnets:
     print(sub.network, sub.usable_hosts, sub.first_usable, sub.last_usable)
 ```
+## Notebook
 
+[`subnet_calculator.ipynb`](subnet_calculator.ipynb) has the same example as
+above, worked through interactively with `allocate_vlsm` imported directly
+and the result shown as a `pandas` DataFrame. It's executed in CI on every
+push and pull request, so it can't silently go stale.
+
+## Running the tests
 ## Running the tests
 
 ```bash
