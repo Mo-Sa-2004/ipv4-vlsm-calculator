@@ -20,8 +20,8 @@ with no gaps or overlaps.
   don't fit) instead of crashing.
 - Correctly handles `/31` point-to-point links (both addresses usable, per
   [RFC 3021](https://www.rfc-editor.org/rfc/rfc3021)).
-- Covered by unit tests, importable as a module if you want the allocation
-  logic in your own code.
+- 100% test coverage and a clean mypy run, both enforced in CI; importable
+  as a module if you want the allocation logic in your own code.
 - Non-interactive mode (`--network` / `--sizes` / `--json`) for scripting,
   alongside the interactive prompts.
 
@@ -131,6 +131,7 @@ subnets = allocate_vlsm(base, [50, 20, 10, 2])
 for sub in subnets:
     print(sub.network, sub.usable_hosts, sub.first_usable, sub.last_usable)
 ```
+
 ## Notebook
 
 [`subnet_calculator.ipynb`](subnet_calculator.ipynb) has the same example as
@@ -139,15 +140,18 @@ and the result shown as a `pandas` DataFrame. It's executed in CI on every
 push and pull request, so it can't silently go stale.
 
 ## Running the tests
-## Running the tests
 
 ```bash
 pip install -r requirements-dev.txt
-pytest       # unit tests, CLI end-to-end tests, and the doctest example
-ruff check . # lint
+pytest --cov=subnet_calculator --cov-report=term-missing  # tests + coverage
+ruff check .                                               # lint
+mypy subnet_calculator.py                                  # type checking
 ```
 
-Both run automatically in GitHub Actions on every push and pull request.
+The test suite covers 100% of `subnet_calculator.py` (enforced in CI via
+`--cov-fail-under=100`), and all three checks above run automatically in
+GitHub Actions on every push and pull request, along with executing the
+demo notebook (see [Notebook](#notebook)) to make sure it still runs.
 See [CONTRIBUTING.md](CONTRIBUTING.md) if you'd like to submit one.
 
 ## License
