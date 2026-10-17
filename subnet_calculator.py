@@ -105,7 +105,7 @@ def allocate_vlsm(
     cursor = int(base.network_address)
     limit = int(base.broadcast_address) + 1
 
-        for i in order:
+    for i in order:
         try:
             size = next_power_of_two(requested_sizes[i])
         except ValueError as exc:
