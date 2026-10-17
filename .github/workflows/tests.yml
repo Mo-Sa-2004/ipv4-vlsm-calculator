@@ -26,7 +26,7 @@ jobs:
       - name: Run tests
         run: >-
           pytest -v --cov=subnet_calculator --cov-report=term-missing
-          --cov-fail-under=43
+          --cov-fail-under=100
 
   lint:
     runs-on: ubuntu-latest

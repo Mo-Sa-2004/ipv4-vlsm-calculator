@@ -292,5 +292,5 @@ def main(argv: list[str] | None = None) -> None:
     print(("\n" + output) if not args.json else output)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - trivial script entry point
     main()
