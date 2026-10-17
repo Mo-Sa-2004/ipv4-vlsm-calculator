@@ -32,4 +32,5 @@ testpaths = [
     "test_subnet_calculator.py",
     "test_cli.py",
     "test_rendering.py",
+    "test_interactive.py",
 ]
